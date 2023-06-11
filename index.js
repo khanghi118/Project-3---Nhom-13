@@ -1,41 +1,44 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import { createBrowserRouter,createRoutesFromElements,Route,RouterProvider } from 'react-router-dom';
-import Home from './page/Home';
-import Menu from './page/Menu';
-import About from './page/About';
-import Contact from './page/Contact';
-import Login from './page/login';
-import Newproduct from './page/Newproduct';
-import Signup from './page/Signup';
+const express = require("express")
+const cors = require("cors")
+const mongoose = require("mongoose")
+const dotennv = require("dotenv").config()
 
+const app = express()
+app.use(cors())
+app.use(express.json({limit:"10mb"}))
 
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <Route path='/'element={<App/>}>
-      <Route index element={<Home/>}/>
-      <Route path='menu' element={<Menu/>}/>
-      <Route path='about' element={<About/>}/>
-      <Route path='contact' element={<Contact/>}/>
-      <Route path='login' element={<Login/>}/>
-      <Route path='newproduct' element={<Newproduct/>}/>
-      <Route path='signup' element={<Signup/>}/>
+const PORT = process.env.PORT || 8080
+//MONGODB CON
+console.log(process.env.MONGODB_URL)
+mongoose.set('strictQuery', false)
+mongoose.connect(process.env.MONGODB_URL)
+.then(()=>console.log("Connect to Database"))
+.catch((err)=> console.log(err))
+//API
+//schema
+const userSchema = mongoose.Schema({
+        firstName : String, 
+                lastName : String,
+                email : {
+                    type: String,
+                    unique: true,
+                },
+                password: String,
+                confirmPassword: String,
+                image: String,
+})
+const userModel = mongoose.model("user", userSchema)
+app.get("/",(req, res)=>{
+    res.send("Sever is running")
+})
+app.post("/signup", (req, res) => {
+    console.log(req.body)
+    const {email} = req.body
 
+    userModel.findOne({email: email},(err,result)=> {
+        console.log(result)
+        console.log(err)
+    })
+})
 
-    </Route>
-))
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-<RouterProvider router={router}/>
-    
-  
-);
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+app.listen(PORT,()=> console.log("Sever is running at PORT: " + PORT))
