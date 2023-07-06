@@ -24,10 +24,6 @@ const userSchema = new mongoose.Schema(
       type: {},
       required: true,
     },
-    answer: {
-      type: String,
-      required: true,
-    },
     role: {
       type: Number,
       default: 0,
@@ -36,4 +32,4 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("AAA", userSchema);
+export default mongoose.model("aaas", userSchema);
