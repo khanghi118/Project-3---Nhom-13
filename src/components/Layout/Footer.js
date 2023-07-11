@@ -7,8 +7,8 @@ const Footer = () => {
         <Link to="/about">Cookie settings</Link>|
         <Link to="/contact">Privacy Policy</Link>|
         <Link to="/policy">Terms and Conditions</Link>|
-        <Link to="/policy">PUBLISHED BY</Link>|
-        <Link to="/policy"> © 2020 adidas Vietnam Company Limited</Link>
+        <Link to="#">PUBLISHED BY</Link>|
+        <Link to="#"> © 2020 adidas Vietnam Company Limited</Link>
       </p>
     </div>
   );

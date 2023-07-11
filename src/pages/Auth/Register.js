@@ -11,6 +11,7 @@ const Register = () => {
   const [password, setPassword] = useState("")
   const [phone, setPhone] = useState("")
   const [address, setAddress] = useState("")
+  const [answer,setAnswer] = useState("")
   const navigate = useNavigate()
     
 //form function
@@ -18,7 +19,7 @@ const handleSubmit = async (e) => {
   e.preventDefault()
   try {
     const res = await axios.post("/api/v1/auth/register",
-       {name,email,password,phone,address});
+       {name,email,password,phone,address,answer});
        
   if(res.data.success){
     toast.success(res.data.message)
@@ -56,6 +57,10 @@ return (
 
     <div className="mb-3" style={{ marginBottom: '15px' }}>
       <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className="form-control" id="exampleInputPassword1" placeholder="Enter your Address" style={{ width: '100%', padding: '10px', border: 'none', borderRadius: '5px', backgroundColor: '#f0f0f0', fontSize: '16px', transition: 'background-color 0.3s' }} required />
+    </div>
+
+    <div className="mb-3" style={{ marginBottom: '15px' }}>
+      <input type="text" value={answer} onChange={(e) => setAnswer(e.target.value)} className="form-control" id="exampleInputPassword1" placeholder="What is your Favorite Sports?" style={{ width: '100%', padding: '10px', border: 'none', borderRadius: '5px', backgroundColor: '#f0f0f0', fontSize: '16px', transition: 'background-color 0.3s' }} required />
     </div>
 
     <button type="submit" className="btn btn-primary" style={{ padding: '10px', border: 'none', borderRadius: '5px', backgroundColor: 'black', color: '#fff', fontSize: '16px', cursor: 'pointer', transition: 'background-color 0.3s' }}>Submit</button>

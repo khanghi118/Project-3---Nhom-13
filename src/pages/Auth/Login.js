@@ -54,8 +54,7 @@ const Login = () => {
     <div className="mb-3" style={{ marginBottom: '15px' }}>
       <input type="text" value={password} onChange={(e) => setPassword(e.target.value)} className="form-control" id="exampleInputPassword1" placeholder="Enter your Password " style={{ width: '100%', padding: '10px', border: 'none', borderRadius: '5px', backgroundColor: '#f0f0f0', fontSize: '16px', transition: 'background-color 0.3s' }} required />
     </div>
-
-
+    <button type="submit" className="" style={{ margin:'10px', padding: '10px', }} onClick={() => {navigate("/forgot-password")}}>Forgot Password?</button>
     <button type="submit" className="btn btn-primary" style={{ padding: '10px', border: 'none', borderRadius: '5px', backgroundColor: 'black', color: '#fff', fontSize: '16px', cursor: 'pointer', transition: 'background-color 0.3s' }}>Login</button>
   </form>
 </div>
