@@ -1,18 +1,25 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../components/Layout/Layout";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import {Checkbox, Radio} from "antd";
-import toast from "react-hot-toast"
+import { Checkbox, Radio } from "antd";
+import toast from "react-hot-toast";
 import { Prices } from "../components/Prices";
+import { useCart } from "../context/cart";
+import "../styles/Homepage.css";
 
 const HomePage = () => {
+  const navigate = useNavigate();
+  const [Cart, setCart] = useCart();
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [checked, setChecked] = useState([]);
+  const [radio, setRadio] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
-  const [products, setProducts] = useState([])
-  const [categories, setCategories] = useState ([])
-  const [checked, setChecked] = useState([])
-  const [radio, setRadio] = useState([])
-
-  //get all cat
+  // Get all categories
   const getAllCategory = async () => {
     try {
       const { data } = await axios.get("/api/v1/category/get-category");
@@ -21,71 +28,107 @@ const HomePage = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something wwent wrong in getting catgeory");
+      toast.error("Something went wrong in getting categories");
     }
   };
 
   useEffect(() => {
     getAllCategory();
+    getTotal();
   }, []);
 
-  //get products
+  // Get products
   const getAllProducts = async () => {
     try {
-      const {data} = await axios.get("/api/v1/product/get-product")
-      setProducts(data.products)
+      setLoading(true);
+      const { data } = await axios.get(`/api/v1/product/product-list/${page}`);
+      setLoading(false);
+      setProducts(data.products);
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+    }
+  };
+
+  // Get total count
+  const getTotal = async () => {
+    try {
+      const { data } = await axios.get("/api/v1/product/product-count");
+      setTotal(data?.total);
     } catch (error) {
       console.log(error);
     }
   };
 
-    const handleFilter = (value,id) => {
-      let all = [...checked]
-      if (value) {
-        all.push(id)
-      } else {
-        all = all.filter((c) => c !== id)
-      }
-      setChecked(all);
-    }
-  
   useEffect(() => {
-    if(!checked.length || !radio.length) getAllProducts();
+    if (page === 1) return;
+    loadMore();
+  }, [page]);
+
+  // Load more
+  const loadMore = async () => {
+    try {
+      setLoading(true);
+      const { data } = await axios.get(`/api/v1/product/product-list/${page}`);
+      setLoading(false);
+      setProducts([...products, ...data?.products]);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+
+  // Filter by category
+  const handleFilter = (value, id) => {
+    let all = [...checked];
+    if (value) {
+      all.push(id);
+    } else {
+      all = all.filter((c) => c !== id);
+    }
+    setChecked(all);
+  };
+
+  useEffect(() => {
+    if (!checked.length || !radio.length) getAllProducts();
   }, [checked.length, radio.length]);
 
   useEffect(() => {
-    if(checked.length || !radio.length) filterProduct();
+    if (checked.length || !radio.length) filterProduct();
   }, [checked, radio]);
 
-  //get filtred product
+  // Get filtered products
   const filterProduct = async () => {
     try {
-      const {data} = await axios.post("/api/v1/product/product-filters",{checked,radio})
-      setProducts(data?.products)
+      const { data } = await axios.post("/api/v1/product/product-filters", {
+        checked,
+        radio,
+      });
+      setProducts(data?.products);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
-
+  };
 
   return (
-    
-        <Layout title={"All Products"}>
-          <div className="row mt-3">
-            <div className="col-md-2">
-              {/* filter category */}
-              <h4 className="text-center">Filter by Category</h4>
-              <div className="d-flex felx-column">
-              {categories?.map((c)=> (
-                <Checkbox key={c._id} onChange={(e) => handleFilter(e.target.checked, c._id)}>
-                  {c.name}
-                </Checkbox>
-              ))}
-              </div>
+    <Layout title={"All Products"}>
+      <div className="row mt-3">
+        <div className="col-md-2 filters">
+          {/* Filter by category */}
+          <h4 className="text-center">Filter by Category</h4>
+          <div className="d-flex felx-column">
+            {categories?.map((c) => (
+              <Checkbox
+                key={c._id}
+                onChange={(e) => handleFilter(e.target.checked, c._id)}
+              >
+                {c.name}
+              </Checkbox>
+            ))}
+          </div>
 
-{/* filter price */}
-
-              <h4 className="text-center mt-4">Filter By Price</h4>
+          {/* Filter by price */}
+          <h4 className="text-center mt-4">Filter By Price</h4>
           <div className="d-flex flex-column">
             <Radio.Group onChange={(e) => setRadio(e.target.value)}>
               {Prices?.map((p) => (
@@ -95,35 +138,71 @@ const HomePage = () => {
               ))}
             </Radio.Group>
           </div>
+          <div className="d-flex flex-column">
+            <button
+              className="btn btn-danger"
+              onClick={() => window.location.reload()}
+            >
+              Reset Filters
+            </button>
           </div>
-              <div className="col-md-9">
-                {JSON.stringify(radio,null,3)}
-                <h1 className="text-center">All Products</h1>
-                <div className="d-flex flex-wrap">
-                {products?.map((p) => (
-                <div className="card m-2" style={{ width: "18rem" }}>
-                  <img
-                    src={`/api/v1/product/product-photo/${p._id}`}
-                    className="card-img-top"
-                    alt={p.name}
-                  />
-                  <div className="card-body">
-                    <h5 className="card-title">{p.name}</h5>
-                    <p className="card-text">{p.description.substring(0, 30)}...
-                    </p>
-                    <p className="card-text">${p.price}</p>
-                    <button class="btn btn-primary ms-1">See Deatails</button>
-                    <button class="btn btn-secondary ms-1">Add to cart</button>
-                  </div>
+        </div>
+        <div className="col-md-9 home-page">
+          <h1 className="text-center">All Products</h1>
+          <div className="d-flex flex-wrap">
+            {products?.map((p) => (
+              <div className="card m-2" style={{ width: "18rem" }} key={p._id}>
+                <img
+                  src={`/api/v1/product/product-photo/${p._id}`}
+                  className="card-img-top"
+                  alt={p.name}
+                />
+                <div className="card-body">
+                  <h5 className="card-title">{p.name}</h5>
+                  <p className="card-text">
+                    {p.description.substring(0, 30)}...
+                  </p>
+                  <p className="card-text card-price">${p.price}</p>
+                  <button
+                    className="btn btn-primary ms-1"
+                    onClick={() => navigate(`/product/${p.slug}`)}
+                  >
+                    See Details
+                  </button>
+                  <button
+                    className="btn btn-dark ms-1"
+                    onClick={() => {
+                      setCart([...Cart, p]);
+                      localStorage.setItem(
+                        "cart",
+                        JSON.stringify([...Cart, p])
+                      );
+                      toast.success("Item Added to Cart");
+                    }}
+                  >
+                    Add to Cart
+                  </button>
                 </div>
-              
+              </div>
             ))}
-                </div>
-                </div>
-                </div>
-        </Layout>
-        
-  )
-}
+          </div>
+          <div className="m-2 p-3">
+            {products && products.length < total && (
+              <button
+                className="btn btn-warning loadmore"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setPage(page + 1);
+                }}
+              >
+                {loading ? "Loading..." : <>Load More</>}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+};
 
-export default HomePage
+export default HomePage;

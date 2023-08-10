@@ -4,20 +4,24 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import {AuthProvider} from "./context/auth"
+import { Searchrovider } from "./context/search";
 
-
+import "antd/dist/reset.css"
+import { CartProvider } from "./context/cart";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <AuthProvider>
+    <Searchrovider>
+      <CartProvider>
         <BrowserRouter>
     
           <App />
           
         </BrowserRouter>
+        </CartProvider>
+        </Searchrovider>
      </AuthProvider>
 );
 
